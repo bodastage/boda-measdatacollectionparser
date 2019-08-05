@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="MeasDataCollection.xsl"?>
+<measCollecFile xmlns="http://www.3gpp.org/ftp/specs/archive/32_series/32.435#measCollec"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+                xsi:schemaLocation="http://www.3gpp.org/ftp/specs/archive/32_series/32.435#measCollec
+http://www.3gpp.org/ftp/specs/archive/32_series/32.435#measCollec">
+
+    <fileHeader fileFormatVersion="32.435 V9.0" vendorName="Dialogic" dnPrefix="">
+        <fileSender localDn="NodeName-1"/>
+        <measCollec beginTime="2000-03-01T14:00:00"/>
+    </fileHeader>
+    <measData>
+        <managedElement localDn="NodeName"/>
+        <measInfo>
+            <granPeriod duration="PT1M" endTime="2000-03-01T15:00:00"/>
+            <repPeriod duration="PT1H"/>
+            <measTypes>Provisioned_Server_Capacity Provisioned_Bearer_Capacity
+                Signaling_Link_Capacity Maximum_Service_Capacity ...</measTypes>
+            <measValue measObjLdn="">
+                <measResults>6 360 1 360 ...</measResults>
+            </measValue>
+        </measInfo>
+    </measData>
+    <fileFooter>
+        <measCollec endTime="2000-03-01T15:00:00"/>
+    </fileFooter>
+</measCollecFile>*
