@@ -20,8 +20,7 @@ case class Config(
                  )
 
 
-class MeasDataCollection {
-
+object MeasDataCollection {
   def main(args: Array[String]): Unit = {
 
     val builder = OParser.builder[Config]
