@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bodastage/boda-measdatacollectionparser.svg?branch=master)](https://travis-ci.org/bodastage/boda-measdatacollectionparser)
+
 # boda-measdatacollectionparser
 Parses Huawei performance XML files to csv
 
@@ -5,6 +7,8 @@ Parses Huawei performance XML files to csv
 ```
 java -jar boda-measdatacollectionparser.jar -i FILENAME.xml
 java -jar boda-measdatacollectionparser.jar -i FILENAME.gz
+java -jar boda-measdatacollectionparser.jar -i FILENAME.xml -o /path/to/outputFolder
+java -jar boda-measdatacollectionparser.jar -i FILENAME.gz -o /path/to/outputFolder
 ```
 
 
