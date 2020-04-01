@@ -13,7 +13,7 @@
             <job jobId="01"/>
             <granPeriod endTime="2005-06-09T13:15:00-06:00" duration="PT900S"/>
             <repPeriod duration="PT1800S"/>
-            <measTypes>MM.AttGprsAttach MM.SuccGprsAttach MM. AbortedGprsAttach
+            <measTypes>MM.AttGprsAttach MM.SuccGprsAttach MM.AbortedGprsAttach
                 MM.AttIntraSgsnRaUpdate</measTypes>
             <measValue measObjLdn="SgsnFunction=1">
                 <measResults>10 20 30 40</measResults>
@@ -23,8 +23,8 @@
             <job jobId="02"/>
             <granPeriod endTime="2005-06-09T13:15:00-06:00" duration="PT900S"/>
             <repPeriod duration="PT1800S"/>
-            <measTypes>MM.AttCombiAttach MM.SuccCombiAttach MM.
-                MM.AbortedCombiAttachMM.AttCombiDetachMs</measTypes>
+            <measTypes>MM.AttCombiAttach MM.SuccCombiAttach
+                MM.AbortedCombiAttach MM.AttCombiDetachMs</measTypes>
             <measValue measObjLdn="SgsnFunction=2">
                 <measResults>10 20 30 40</measResults>
             </measValue>
