@@ -32,7 +32,7 @@ object MeasDataCollection {
       import builder._
       OParser.sequence(
         programName("boda-measdatacollectionparser"),
-        head("boda-measdatacollectionparser", "0.1.0"),
+        head("boda-measdatacollectionparser", "0.2.0"),
         opt[File]('i', "in")
           .required()
           .valueName("<file>")
@@ -60,7 +60,7 @@ object MeasDataCollection {
         note("java -jar boda-measdatacollectionparser.jar -i FILENAME.gz -o outputFolder"),
         note("java -jar boda-measdatacollectionparser.jar -i FILENAME.xml -o outputFolder"),
         note(sys.props("line.separator")),
-        note("Copyright (c) 2019 Bodastage Solutions(https://www.bodastage.com)")
+        note("Copyright (c) 2020 Bodastage Solutions(https://www.bodastage.com)")
 
       )
     }
@@ -235,7 +235,7 @@ object MeasDataCollection {
     if(contentType == "application/x-gzip"){
       xml = new XMLEventReader(Source.fromInputStream(this.getGZIPInputStream(fileName)))
     }
-    var buf = ArrayBuffer[String]()
+    var buf = ArrayBuffer[String]();
 
 
     val fileBaseName: String  = getFileBaseName(fileName);
@@ -275,6 +275,12 @@ object MeasDataCollection {
         "suspect";
       pw.write(header + "\n");
     }
+
+	//measType with position values
+	val measTypePositions: ArrayBuffer[Int] =  ArrayBuffer[Int]();
+	val measTypeNames: ArrayBuffer[String] =  ArrayBuffer[String]();
+	var measTypeResults:Map[Int,String] = Map();
+	var currentResultPosition: Int = 0;
 
     for(event <- xml) {
       event match {
@@ -334,7 +340,20 @@ object MeasDataCollection {
               if (m.key == "duration") reportingPeriod = m.value.toString()
             }
           }
-
+		  
+		  //Only present in XML with positional values
+          if (tag == "measType") {
+            for (m <- attrs) {
+              if (m.key == "p") measTypePositions += m.value.toString().toInt
+            }
+          }
+		  
+		  if (tag == "r") {
+			for (m <- attrs) {
+              if (m.key == "p") currentResultPosition = m.value.toString().toInt
+            }
+		  }
+		  
           if (tag == "measValue") {
             suspect = "";
             for (m <- attrs) {
@@ -348,6 +367,12 @@ object MeasDataCollection {
         }
 
         case EvElemEnd(_, tag) => {
+		
+		  //Only present in XML with positional values
+          if (tag == "measType") {
+            measTypeNames += buf.mkString
+          }
+		  
           if (tag == "measTypes") {
             measTypes = buf.mkString.replaceAll("\\s+"," ").trim()
             val msTypes = measTypes.split(" ")
@@ -366,6 +391,8 @@ object MeasDataCollection {
 
           if (tag == "measValue") {
             var i = 0;
+			
+			//For positional values, measTypesList is empty
             for(i <- 0 to measTypesList.length-1){
               var measResult : String = measResultsList(i).toString
               var measType : String  = measTypesList(i)
@@ -399,8 +426,61 @@ object MeasDataCollection {
                 pw.write(csvRow + "\n");
               }
             }
+			
+			//XML with positional values 
+			for(i <- 0 until measTypePositions.length){
+
+				val pos = measTypePositions(i)
+				var measType : String  = measTypeNames(i)
+				var measResult : String  = measTypeResults(pos)
+				
+              val csvRow : String =
+                s"${getFileBaseName(fileName)}," +
+                s"${fileFormatVersion}," +
+                s"${vendorName}," +
+                s"${toCSVFormat(fileHeaderDnPrefix)}," +
+                s"${toCSVFormat(fileSenderLocalDn)}," +
+                s"${elementType}," +
+                s"${collectionBeginTime}," +
+                  s"${measCollectionTime(1)}," +
+                s"${toCSVFormat(managedElementLocalDn)}," +
+                s"${neSoftwareVersion}," +
+                s"${measInfoId}," +
+                s"${measTimeStamp}," +
+                s"${jobId}," +
+                s"${granPeriodDuration}," +
+                s"${granPeriodEndTime}," +
+                s"${reportingPeriod}," +
+                s"${toCSVFormat(managedElementUserLabel)}," +
+                s"${toCSVFormat(measObjLdn)}," +
+                s"${measType}," +
+                s"${measResult}," +
+                s"${suspect}" ;
+
+              if(outputFolder.length == 0) {
+                println(csvRow);
+              }else{
+                pw.write(csvRow + "\n");
+              }
+			}
+			
+			
+			//Reset values 
+			measTypeResults = Map[Int, String]()
 
           }
+		  
+		  if (tag == "r") {
+		    val posRes = buf.mkString.replaceAll("\\s+"," ").trim();
+			measTypeResults += ( currentResultPosition -> posRes) 
+		  }
+		  
+		  //Reset measTypePositions and measTypeNames at closing granPeriod tag
+		  if (tag == "measInfo") {
+			measTypePositions.clear
+			measTypeNames.clear
+		  }
+		  
 
           buf.clear
         }
@@ -408,6 +488,7 @@ object MeasDataCollection {
         case _ =>
       }
     }
+
 
 
     if(pw != null ) pw.close();
