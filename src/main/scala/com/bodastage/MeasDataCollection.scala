@@ -276,11 +276,11 @@ object MeasDataCollection {
       pw.write(header + "\n");
     }
 
-	//measType with position values
-	val measTypePositions: ArrayBuffer[Int] =  ArrayBuffer[Int]();
-	val measTypeNames: ArrayBuffer[String] =  ArrayBuffer[String]();
-	var measTypeResults:Map[Int,String] = Map();
-	var currentResultPosition: Int = 0;
+    //measType with position values
+    val measTypePositions: ArrayBuffer[Int] =  ArrayBuffer[Int]();
+    val measTypeNames: ArrayBuffer[String] =  ArrayBuffer[String]();
+    var measTypeResults:Map[Int,String] = Map();
+    var currentResultPosition: Int = 0;
 
     for(event <- xml) {
       event match {
@@ -289,16 +289,17 @@ object MeasDataCollection {
 
           if (tag == "fileHeader") {
             for (m <- attrs) {
-              if (m.key == "localDn") fileSenderLocalDn = m.value.toString()
-              if (m.key == "elementType") elementType = m.value.toString()
+              if (m.key == "fileFormatVersion") fileFormatVersion = m.value.toString()
+              if (m.key == "vendorName") vendorName = m.value.toString()
               if (m.key == "dnPrefix") fileHeaderDnPrefix = m.value.toString()
             }
           }
 
           if (tag == "fileSender") {
             for (m <- attrs) {
-              if (m.key == "fileFormatVersion") fileFormatVersion = m.value.toString()
-              if (m.key == "vendorName") vendorName = m.value.toString()
+              if (m.key == "localDn") fileSenderLocalDn = m.value.toString()
+              if (m.key == "elementType") elementType = m.value.toString()
+              
             }
           }
 
@@ -312,6 +313,7 @@ object MeasDataCollection {
             for (m <- attrs) {
               if (m.key == "localDn") managedElementLocalDn = m.value.toString()
               if (m.key == "userLabel") managedElementUserLabel = m.value.toString()
+			  if (m.key == "swVersion") neSoftwareVersion = m.value.toString()
             }
           }
 
@@ -340,20 +342,20 @@ object MeasDataCollection {
               if (m.key == "duration") reportingPeriod = m.value.toString()
             }
           }
-		  
-		  //Only present in XML with positional values
+
+          //Only present in XML with positional values
           if (tag == "measType") {
             for (m <- attrs) {
               if (m.key == "p") measTypePositions += m.value.toString().toInt
             }
           }
-		  
-		  if (tag == "r") {
-			for (m <- attrs) {
+
+          if (tag == "r") {
+            for (m <- attrs) {
               if (m.key == "p") currentResultPosition = m.value.toString().toInt
             }
-		  }
-		  
+          }
+
           if (tag == "measValue") {
             suspect = "";
             for (m <- attrs) {
@@ -367,12 +369,12 @@ object MeasDataCollection {
         }
 
         case EvElemEnd(_, tag) => {
-		
-		  //Only present in XML with positional values
+
+          //Only present in XML with positional values
           if (tag == "measType") {
             measTypeNames += buf.mkString
           }
-		  
+
           if (tag == "measTypes") {
             measTypes = buf.mkString.replaceAll("\\s+"," ").trim()
             val msTypes = measTypes.split(" ")
@@ -391,8 +393,8 @@ object MeasDataCollection {
 
           if (tag == "measValue") {
             var i = 0;
-			
-			//For positional values, measTypesList is empty
+
+            //For positional values, measTypesList is empty
             for(i <- 0 to measTypesList.length-1){
               var measResult : String = measResultsList(i).toString
               var measType : String  = measTypesList(i)
@@ -426,15 +428,15 @@ object MeasDataCollection {
                 pw.write(csvRow + "\n");
               }
             }
-			
-			//XML with positional values 
-			for(i <- 0 until measTypePositions.length){
 
-				val pos = measTypePositions(i)
-				var measType : String  = measTypeNames(i)
-				var measResult : String  = measTypeResults(pos)
-				
-              val csvRow : String =
+            //XML with positional values 
+            for(i <- 0 until measTypePositions.length){
+
+                val pos = measTypePositions(i)
+                var measType : String  = measTypeNames(i)
+                var measResult : String  = measTypeResults(pos)
+ 
+                val csvRow : String =
                 s"${getFileBaseName(fileName)}," +
                 s"${fileFormatVersion}," +
                 s"${vendorName}," +
@@ -462,25 +464,24 @@ object MeasDataCollection {
               }else{
                 pw.write(csvRow + "\n");
               }
-			}
-			
-			
-			//Reset values 
-			measTypeResults = Map[Int, String]()
+            }
+
+            //Reset values 
+            measTypeResults = Map[Int, String]()
 
           }
-		  
-		  if (tag == "r") {
-		    val posRes = buf.mkString.replaceAll("\\s+"," ").trim();
-			measTypeResults += ( currentResultPosition -> posRes) 
-		  }
-		  
-		  //Reset measTypePositions and measTypeNames at closing granPeriod tag
-		  if (tag == "measInfo") {
-			measTypePositions.clear
-			measTypeNames.clear
-		  }
-		  
+
+          if (tag == "r") {
+            val posRes = buf.mkString.replaceAll("\\s+"," ").trim();
+            measTypeResults += ( currentResultPosition -> posRes) 
+          }
+ 
+          //Reset measTypePositions and measTypeNames at closing measInfo tag
+          if (tag == "measInfo") {
+            measTypePositions.clear
+            measTypeNames.clear
+          }
+          
 
           buf.clear
         }
