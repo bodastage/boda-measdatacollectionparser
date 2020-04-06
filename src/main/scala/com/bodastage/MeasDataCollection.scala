@@ -14,6 +14,7 @@ import java.util.zip.GZIPInputStream
 import java.io.BufferedInputStream
 import java.io.FileInputStream
 import java.io._
+import util.control.Breaks._
 
 case class Config(
                    in: File = new File("."),
@@ -32,7 +33,7 @@ object MeasDataCollection {
       import builder._
       OParser.sequence(
         programName("boda-measdatacollectionparser"),
-        head("boda-measdatacollectionparser", "0.2.0"),
+        head("boda-measdatacollectionparser", "0.2.2"),
         opt[File]('i', "in")
           .required()
           .valueName("<file>")
@@ -431,38 +432,46 @@ object MeasDataCollection {
 
             //XML with positional values 
             for(i <- 0 until measTypePositions.length){
-
-                val pos = measTypePositions(i)
+              breakable {
+                
+				val pos = measTypePositions(i)
+				
+                  //Check if there a result for the position
+                if (!measTypeResults.exists(_._1 == pos)) break
+    
+                
                 var measType : String  = measTypeNames(i)
-                var measResult : String  = measTypeResults(pos)
- 
+                var measResult : String = measTypeResults(pos)
+			      
                 val csvRow : String =
-                s"${getFileBaseName(fileName)}," +
-                s"${fileFormatVersion}," +
-                s"${vendorName}," +
-                s"${toCSVFormat(fileHeaderDnPrefix)}," +
-                s"${toCSVFormat(fileSenderLocalDn)}," +
-                s"${elementType}," +
-                s"${collectionBeginTime}," +
-                  s"${measCollectionTime(1)}," +
-                s"${toCSVFormat(managedElementLocalDn)}," +
-                s"${neSoftwareVersion}," +
-                s"${measInfoId}," +
-                s"${measTimeStamp}," +
-                s"${jobId}," +
-                s"${granPeriodDuration}," +
-                s"${granPeriodEndTime}," +
-                s"${reportingPeriod}," +
-                s"${toCSVFormat(managedElementUserLabel)}," +
-                s"${toCSVFormat(measObjLdn)}," +
-                s"${measType}," +
-                s"${measResult}," +
-                s"${suspect}" ;
+                  s"${getFileBaseName(fileName)}," +
+                  s"${fileFormatVersion}," +
+                  s"${vendorName}," +
+                  s"${toCSVFormat(fileHeaderDnPrefix)}," +
+                  s"${toCSVFormat(fileSenderLocalDn)}," +
+                  s"${elementType}," +
+                  s"${collectionBeginTime}," +
+                    s"${measCollectionTime(1)}," +
+                  s"${toCSVFormat(managedElementLocalDn)}," +
+                  s"${neSoftwareVersion}," +
+                  s"${measInfoId}," +
+                  s"${measTimeStamp}," +
+                  s"${jobId}," +
+                  s"${granPeriodDuration}," +
+                  s"${granPeriodEndTime}," +
+                  s"${reportingPeriod}," +
+                  s"${toCSVFormat(managedElementUserLabel)}," +
+                  s"${toCSVFormat(measObjLdn)}," +
+                  s"${measType}," +
+                  s"${measResult}," +
+                  s"${suspect}" ;
 
-              if(outputFolder.length == 0) {
-                println(csvRow);
-              }else{
-                pw.write(csvRow + "\n");
+                if(outputFolder.length == 0) {
+                  println(csvRow);
+                }else{
+                  pw.write(csvRow + "\n");
+                }
+
               }
             }
 
