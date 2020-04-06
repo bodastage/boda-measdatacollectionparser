@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/bodastage/boda-measdatacollectionparser.svg?branch=master)](https://travis-ci.org/bodastage/boda-measdatacollectionparser)
 
 # boda-measdatacollectionparser
-Parses Huawei performance XML files to csv
+Parses measurement collection data XML files to csv
 
 # Usage
 ```
